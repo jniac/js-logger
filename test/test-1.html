@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+        <style media="screen">
+            body{ padding: 64px }
+        </style>
+    </head>
+    <body>
+        <pre></pre>
+        <script type="module">
+
+            import Logger from '../src/Logger.js'
+
+            const consoleLog = console.log.bind(console)
+
+            console.log = (...args) => {
+
+                document.querySelector('pre').append(args.join(' ') + '\n')
+
+                consoleLog(...args)
+
+            }
+
+            let logger = new Logger()
+            let count = 1
+
+            logger.debug('hello', count++)       // "hello 1"
+            logger.info('hello', count++)        // "hello 2"
+            logger.warn('hello', count++)        // "hello 3"
+            logger.error('hello', count++)       // "hello 4"
+
+            logger.setLevel('warn')
+
+            logger.debug('hello', count++)       // muted!
+            logger.info('hello', count++)        // muted!
+            logger.warn('hello', count++)        // "hello 7"
+            logger.error('hello', count++)       // "hello 8"
+
+            // ### overrides
+
+            // format
+            logger.format.default = (logger, ...args) => [logger.currentLevel.toUpperCase(), ...args]
+
+            logger.verbose = true // === logger.setLevel('debug')
+
+            logger.debug('hello', count++)       // "DEBUG hello 9"
+            logger.info('hello', count++)        // "INFO hello 10"
+            logger.warn('hello', count++)        // "WARN hello 11"
+            logger.error('hello', count++)       // "ERROR hello 12"
+
+            // out
+            logger.out = (...args) => {
+
+                console.log('a log is coming...')
+                console.log(...args)
+
+            }
+
+            logger.debug('hello', count++)       // "a log is coming..." & "DEBUG hello 13"
+
+
+
+            logger = new Logger()
+
+            // custom format
+            logger.setFormat({
+
+                time: (logger, ...args) => [new Date().toTimeString().slice(0, 8), ...args],
+
+                caps: (logger, ...args) => args.map(value => String(value).toUpperCase()),
+
+                red: (logger, ...args) => [`%c${args.join(' ')}`, 'font-size: 24px; color: red;']
+
+            })
+
+            logger.time.debug('hello', true, false)     // "15:34:21 hello true false"
+            logger.caps.debug('hello', true, false)     // "HELLO TRUE FALSE"
+            logger.red.debug('hello', true, false)     // "hello true false" (big & red in the browser console)
+
+
+        </script>
+    </body>
+</html>
