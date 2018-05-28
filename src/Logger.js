@@ -19,6 +19,14 @@ const defautFormat = {
 const noop = () => {}
 const identity = (...args) => args
 
+const allowLog = (logger, currentLevel) => {
+
+    let { level, parent } = logger
+
+    return Levels[currentLevel] >= Levels[level] || (parent && allowLog(parent, currentLevel))
+
+}
+
 const applyFormat = (logger, name, args) => {
 
     let format = logger.format[name] || defautFormat[name]
@@ -27,23 +35,25 @@ const applyFormat = (logger, name, args) => {
 
 }
 
-const log = (logger, currentLevel, ...args) => {
+let currentLogger, currentFormat, currentLevel
 
-    let { prefix, format, currentFormat } = logger
+const log = (...args) => {
 
-    logger.currentLevel = currentLevel
-    Logger.current = logger
+    let { prefix, format } = currentLogger
 
-    args = applyFormat(logger, 'default', args)
+    args = applyFormat(currentLogger, 'default', args)
 
-    args = applyFormat(logger, currentFormat, args)
+    args = applyFormat(currentLogger, currentFormat, args)
 
     if (prefix)
         args.unshift(prefix)
-        
-    logger.out(...args)
 
-    return logger
+    currentLogger.out(...args)
+
+    // do not forget to reset the currentFormat
+    currentFormat = null
+
+    return currentLogger
 
 }
 
@@ -57,14 +67,21 @@ export default class Logger {
 
     }
 
+    static get currentLogger() { return currentLogger }
+    static get currentLevel() { return currentLevel }
+    static get currentFormat() { return currentFormat }
+
     constructor({ prefix, level = 'debug', format = null } = {}) {
 
-        this.prefix = prefix
-        this.format = {
 
-            default: null,
+        Object.assign(this, {
 
-        }
+            prefix,
+            format: {},
+            level,
+            parent: null,
+
+        })
 
         this.setLevel(level)
         this.setFormat(format)
@@ -73,19 +90,30 @@ export default class Logger {
 
             get: (target, key) => {
 
-                let currentFormat = (key in target.format || key in defautFormat) && key
+                // 1
+                // check if key match a property (instance or prototype)
+                if (key in target || key in Logger.prototype)
+                    return target[key]
 
-                target.currentFormat = currentFormat
+                // 2
+                // if not, define the target as the current logger:
+                currentLogger = target
+
+                // 3
+                // check and define the currentLevel, if ok, return log method (or noop according to the level constraint)
+                currentLevel = (key in Levels) && key
+
+                if (currentLevel)
+                    return allowLog(currentLogger, currentLevel) ? log : noop
+
+                // 4
+                // the log method was not invoked, maybe the key refers to a format, if so, activate the format
+                currentFormat = (key in target.format || key in defautFormat) && key
 
                 if (currentFormat)
-                    return target
+                    return target.proxied
 
-                if (key in Levels) {
-
-                    target.currentLevel = key
-
-                }
-
+                // 4 nothing matched, create a new property
                 return target[key]
 
             },
@@ -98,20 +126,7 @@ export default class Logger {
 
     setLevel(level) {
 
-        for (let [key, index] of Object.entries(Levels)) {
-
-            Object.defineProperty(this, key, {
-
-                value: Levels[level] > index ? noop : log.bind(null, this, key),
-                configurable: true,
-
-            })
-
-        }
-
-        Object.assign(this, { level })
-
-        return this
+        return Object.assign(this, { level })
 
     }
 
@@ -123,6 +138,12 @@ export default class Logger {
         Object.assign(this.format, format)
 
         return this
+
+    }
+
+    setParent(parent) {
+
+        return Object.assign(this, { parent })
 
     }
 

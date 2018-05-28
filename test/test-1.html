@@ -41,7 +41,7 @@
             // ### overrides
 
             // format
-            logger.format.default = (...args) => [Logger.current.currentLevel.toUpperCase(), ...args]
+            logger.format.default = (...args) => [Logger.currentLevel.toUpperCase(), ...args]
 
             logger.verbose = true // === logger.setLevel('debug')
 
@@ -62,7 +62,8 @@
 
 
 
-            logger = new Logger({ prefix: 'Format:' })
+            logger = new Logger()
+            window.logger = logger
 
             // custom format
             logger.setFormat({
@@ -79,8 +80,28 @@
             logger.caps.debug('hello', true, false)     // "HELLO TRUE FALSE"
             logger.red.debug('hello', true, false)     // "hello true false" (big & red in the browser console)
 
-            logger.ms.debug(23.421, 'perf')     // "hello true false" (big & red in the browser console)
+            logger.ms.debug(1/3, 'perf')     // "hello true false" (big & red in the browser console)
 
+
+
+
+            // hierarchy
+
+            let A = new Logger({ prefix: 'PARENT' })
+            let B = new Logger({ prefix: 'CHILD' })
+
+            B.warn('before silence!')
+            B.level = 'error'
+            B.warn('hey!!!') // muted
+
+            B.parent = A
+            B.warn('Mom allows me to speak')
+
+            A.level = 'error'
+
+            B.warn('but not anymore...')
+
+            Object.assign(window, { A, B })
 
 
         </script>
