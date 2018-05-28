@@ -41,7 +41,7 @@
             // ### overrides
 
             // format
-            logger.format.default = (logger, ...args) => [logger.currentLevel.toUpperCase(), ...args]
+            logger.format.default = (...args) => [Logger.current.currentLevel.toUpperCase(), ...args]
 
             logger.verbose = true // === logger.setLevel('debug')
 
@@ -67,17 +67,20 @@
             // custom format
             logger.setFormat({
 
-                time: (logger, ...args) => [new Date().toTimeString().slice(0, 8), ...args],
+                time: (...args) => [new Date().toTimeString().slice(0, 8), ...args],
 
-                caps: (logger, ...args) => args.map(value => String(value).toUpperCase()),
+                caps: (...args) => args.map(value => String(value).toUpperCase()),
 
-                red: (logger, ...args) => [`%c${args.join(' ')}`, 'font-size: 24px; color: red;']
+                red: (...args) => [`%c${args.join(' ')}`, 'font-size: 24px; color: red;']
 
             })
 
             logger.time.debug('hello', true, false)     // "15:34:21 hello true false"
             logger.caps.debug('hello', true, false)     // "HELLO TRUE FALSE"
             logger.red.debug('hello', true, false)     // "hello true false" (big & red in the browser console)
+
+            logger.ms.debug(23.421, 'perf')     // "hello true false" (big & red in the browser console)
+
 
 
         </script>

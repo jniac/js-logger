@@ -1,6 +1,6 @@
 # js-logger
 
-proposition for as js Logger :
+proposition for as js Logger (es7):
 
 ```javascript
 
@@ -10,7 +10,7 @@ proposition for as js Logger :
 
 ```
 
-### levels:
+## levels:
 
 ```javascript
 
@@ -31,11 +31,14 @@ proposition for as js Logger :
 
 ```
 
-### override:
+---
+
+## override:
+By default any log is dispatched to console.log(), but we can override the `out` method
 
 ```javascript
 
-    logger.out = (...args) => {
+    logger.out = (logger, ...args) => {
 
         console.log('a log is coming...')
         console.log(...args)
@@ -46,7 +49,26 @@ proposition for as js Logger :
 
 ```
 
-### formats:
+Of course `console.log()` can also be discarded:
+```javascript
+
+    logger.out = (logger, ...args) => {
+
+        document.querySelector('pre.console-out').append(args.join(' ') + '\n')
+
+    }
+
+    logger.debug('hello!')       // no log in the console, put a new line in the page
+
+```
+
+---
+
+## formats:
+
+Override is great but do not allow specific usage for specific case. But format does.
+
+Format has an default case, which can be redefined.
 
 ```javascript
 
@@ -56,6 +78,12 @@ proposition for as js Logger :
     logger.warn('be careful!')  // "WARN be careful!"
 
 ```
+
+More interesting :
+ - prefix with the current time
+ - auto cap
+ - style
+
 
 ```javascript
 
@@ -72,5 +100,20 @@ proposition for as js Logger :
     logger.time.debug('hello', true, false)     // "15:34:21 hello true false"
     logger.caps.debug('hello', true, false)     // "HELLO TRUE FALSE"
     logger.red.debug('hello', true, false)      // "hello true false" (big & red in the browser console)
+
+```
+
+Format can be globally or locally defined:
+
+```javascript
+
+    // global
+    Logger.setFormat({ alert: msg => `alert! ${msg}` })
+    ...
+    anyLogger.alert('ah!')
+
+    // global
+    let myLogger = new Logger()
+    myLogger.setFormat({ alert: () => 'alert!' })
 
 ```

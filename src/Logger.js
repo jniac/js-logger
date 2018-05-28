@@ -10,25 +10,34 @@ const Levels = {
 
 const defautFormat = {
 
-    ms: (logger, time, ...args) => [...args, time.toFixed(1) + 'ms'],
+    ms: (time, ...args) => [...args, time.toFixed(1) + 'ms'],
 
 }
 
 const noop = () => {}
 const identity = (...args) => args
 
-const log = (logger, level, ...args) => {
+const applyFormat = (logger, name, args) => {
 
-    let { format, currentFormat } = logger
+    let format = logger.format[name] || defautFormat[name]
 
-    if (format.prefix)
+    return format ? format(...args) : args
+
+}
+
+const log = (logger, currentLevel, ...args) => {
+
+    let { prefix, format, currentFormat } = logger
+
+    if (prefix)
         args.unshift(prefix)
 
-    if (format.default)
-        args = format.default(logger, ...args)
+    logger.currentLevel = currentLevel
+    Logger.current = logger
 
-    if (currentFormat)
-        args = format[currentFormat](logger, ...args)
+    args = applyFormat(logger, 'default', args)
+
+    args = applyFormat(logger, currentFormat, args)
 
     logger.out(...args)
 
@@ -38,12 +47,21 @@ const log = (logger, level, ...args) => {
 
 export default class Logger {
 
-    constructor(level = 'debug', format = defautFormat) {
+    static setFormat(format) {
+
+        Object.assign(defautFormat, format)
+
+        return Logger
+
+    }
+
+    constructor(level = 'debug', format = null) {
+
+        this.prefix = null
 
         this.format = {
 
             default: null,
-            prefix: null,
 
         }
 
@@ -54,9 +72,11 @@ export default class Logger {
 
             get: (target, key) => {
 
-                target.currentFormat = key in target.format && key
+                let currentFormat = (key in target.format || key in defautFormat) && key
 
-                if (key in target.format)
+                target.currentFormat = currentFormat
+
+                if (currentFormat)
                     return target
 
                 if (key in Levels) {
