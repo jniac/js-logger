@@ -107,6 +107,17 @@
             Object.assign(window, { A, B })
 
 
+
+            let D = new Logger({ muted: true })
+            D.warn('ignored')
+            D.error('only error pass')
+
+            D.parent = A
+            A.verbose = true
+
+            D.debug('debug authorized by parent')
+
+
         </script>
     </body>
 </html>

@@ -6,7 +6,7 @@ const Levels = {
     debug: 0,
     info: 1,
     warn: 2,
-    error: 3,
+    error: Infinity,
 
 }
 
@@ -71,7 +71,7 @@ export default class Logger {
     static get currentLevel() { return currentLevel }
     static get currentFormat() { return currentFormat }
 
-    constructor({ prefix, level = 'debug', format = null, parent = null } = {}) {
+    constructor({ prefix, level = 'debug', format = null, parent = null, ...props } = {}) {
 
 
         Object.assign(this, {
@@ -81,7 +81,7 @@ export default class Logger {
             parent,
             format: {},
 
-        })
+        }, props)
 
         this.setFormat(format)
 
@@ -126,17 +126,20 @@ export default class Logger {
     get verbose() { return this.level === Levels.debug }
     set verbose(value) { this.level = value ? 'debug' : 'info' }
 
+    get muted() { return this.level === Levels.error }
+    set muted(value) { this.level = value ? 'error' : 'info' }
+
+    set(props) {
+
+        return Object.assign(this, props)
+
+    }
+
     setFormat(format) {
 
         Object.assign(this.format, format)
 
         return this
-
-    }
-
-    setParent(parent) {
-
-        return Object.assign(this, { parent })
 
     }
 
