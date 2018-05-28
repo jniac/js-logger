@@ -1,4 +1,6 @@
 
+// https://github.com/jniac/js-logger
+
 const Levels = {
 
     debug: 0,
