@@ -31,9 +31,6 @@ const log = (logger, currentLevel, ...args) => {
 
     let { prefix, format, currentFormat } = logger
 
-    if (prefix)
-        args.unshift(prefix)
-
     logger.currentLevel = currentLevel
     Logger.current = logger
 
@@ -41,6 +38,9 @@ const log = (logger, currentLevel, ...args) => {
 
     args = applyFormat(logger, currentFormat, args)
 
+    if (prefix)
+        args.unshift(prefix)
+        
     logger.out(...args)
 
     return logger
@@ -57,10 +57,9 @@ export default class Logger {
 
     }
 
-    constructor(level = 'debug', format = null) {
+    constructor({ prefix, level = 'debug', format = null } = {}) {
 
-        this.prefix = null
-
+        this.prefix = prefix
         this.format = {
 
             default: null,
