@@ -71,19 +71,18 @@ export default class Logger {
     static get currentLevel() { return currentLevel }
     static get currentFormat() { return currentFormat }
 
-    constructor({ prefix, level = 'debug', format = null } = {}) {
+    constructor({ prefix, level = 'debug', format = null, parent = null } = {}) {
 
 
         Object.assign(this, {
 
             prefix,
-            format: {},
             level,
-            parent: null,
+            parent,
+            format: {},
 
         })
 
-        this.setLevel(level)
         this.setFormat(format)
 
         this.proxied = new Proxy(this, {
@@ -124,14 +123,8 @@ export default class Logger {
 
     }
 
-    setLevel(level) {
-
-        return Object.assign(this, { level })
-
-    }
-
     get verbose() { return this.level === Levels.debug }
-    set verbose(value) { this.setLevel(value ? 'debug' : 'info') }
+    set verbose(value) { this.level = value ? 'debug' : 'info' }
 
     setFormat(format) {
 

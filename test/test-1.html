@@ -31,7 +31,7 @@
             logger.warn('hello', count++)        // "hello 3"
             logger.error('hello', count++)       // "hello 4"
 
-            logger.setLevel('warn')
+            logger.level = 'warn'
 
             logger.debug('hello', count++)       // muted!
             logger.info('hello', count++)        // muted!
@@ -43,7 +43,7 @@
             // format
             logger.format.default = (...args) => [Logger.currentLevel.toUpperCase(), ...args]
 
-            logger.verbose = true // === logger.setLevel('debug')
+            logger.verbose = true // === logger.level = 'debug'
 
             logger.debug('hello', count++)       // "DEBUG hello 9"
             logger.info('hello', count++)        // "INFO hello 10"
@@ -100,6 +100,9 @@
             A.level = 'error'
 
             B.warn('but not anymore...')
+
+            let C = new Logger({ parent: A })
+            C.debug('is there anybody out there ?')
 
             Object.assign(window, { A, B })
 
