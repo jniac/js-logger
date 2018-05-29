@@ -123,10 +123,10 @@ export default class Logger {
 
     }
 
-    get verbose() { return this.level === Levels.debug }
+    get verbose() { return this.level === 'debug' }
     set verbose(value) { this.level = value ? 'debug' : 'info' }
 
-    get muted() { return this.level === Levels.error }
+    get muted() { return this.level === 'error' }
     set muted(value) { this.level = value ? 'error' : 'info' }
 
     set(props) {
