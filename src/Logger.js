@@ -12,7 +12,7 @@ const Levels = {
 
 const defautFormat = {
 
-    ms: (time, ...args) => [...args, time.toFixed(1) + 'ms'],
+    ms: (time, ...args) => [...args, `[${time.toFixed(1)}ms]`],
 
 }
 
@@ -146,6 +146,8 @@ export default class Logger {
     out(...args) {
 
         console.log(...args)
+        // or:
+        // console[currentLevel](...args)
 
     }
 

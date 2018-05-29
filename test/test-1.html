@@ -5,6 +5,7 @@
         <title></title>
         <style media="screen">
             body{ padding: 64px }
+            pre span.debug { color: #666; }
         </style>
     </head>
     <body>
@@ -13,15 +14,35 @@
 
             import Logger from '../src/Logger.js'
 
-            const consoleLog = console.log.bind(console)
+            const consoleHandler = {
 
-            console.log = (...args) => {
+                log: console.log.bind(console),
+                debug: console.debug.bind(console),
+                info: console.info.bind(console),
+                warn: console.warn.bind(console),
+                error: console.error.bind(console),
 
-                document.querySelector('pre').append(args.join(' ') + '\n')
+                handle(key, ...args) {
 
-                consoleLog(...args)
+                    let span = document.createElement('span')
+                    span.innerHTML = args.join(' ') + '\n'
+                    span.classList.add(key)
+                    document.querySelector('pre').append(span)
+                    consoleHandler[key](...args)
+
+                }
 
             }
+
+            Object.assign(console, {
+
+                log: (...args) => consoleHandler.handle('log', ...args),
+                debug: (...args) => consoleHandler.handle('debug', ...args),
+                info: (...args) => consoleHandler.handle('info', ...args),
+                warn: (...args) => consoleHandler.handle('warn', ...args),
+                error: (...args) => consoleHandler.handle('error', ...args),
+
+            })
 
             let logger = new Logger()
             let count = 1
@@ -59,6 +80,18 @@
             }
 
             logger.debug('hello', count++)       // "a log is coming..." & "DEBUG hello 13"
+
+            // use console[level]
+
+            logger.out = (...args) => {
+
+                let { currentLevel } = Logger
+                console[currentLevel](...args)
+
+            }
+
+            logger.warn('hey!')
+            logger.error('oups!')
 
 
 
