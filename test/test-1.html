@@ -5,7 +5,10 @@
         <title></title>
         <style media="screen">
             body{ padding: 64px }
-            pre span.debug { color: #666; }
+            pre span.debug { color: #ccc; }
+            pre span.info { color: #c90; }
+            pre span.warn { color: #090; }
+            pre span.error { color: #e00; }
         </style>
     </head>
     <body>
@@ -90,6 +93,8 @@
 
             }
 
+            logger.debug('...')
+            logger.info('hey!')
             logger.warn('hey!')
             logger.error('oups!')
 
@@ -114,6 +119,11 @@
             logger.red.debug('hello', true, false)     // "hello true false" (big & red in the browser console)
 
             logger.ms.debug(1/3, 'perf')     // "hello true false" (big & red in the browser console)
+
+            // bug:
+            logger.verbose = false
+            logger.ms.debug(20, 'debug')
+            logger.info('not verbose')
 
 
 

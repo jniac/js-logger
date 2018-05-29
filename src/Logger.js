@@ -12,12 +12,9 @@ const Levels = {
 
 const defautFormat = {
 
-    ms: (time, ...args) => [...args, `[${time.toFixed(1)}ms]`],
+    ms: (time, ...args) => [...args, typeof time === 'number' ? `[${time.toFixed(1)}ms]` : `[? ${time} ?]`],
 
 }
-
-const noop = () => {}
-const identity = (...args) => args
 
 const allowLog = (logger, currentLevel) => {
 
@@ -37,6 +34,8 @@ const applyFormat = (logger, name, args) => {
 
 let currentLogger, currentFormat, currentLevel
 
+const nolog = () => (currentFormat = null) || currentLogger
+
 const log = (...args) => {
 
     let { prefix, format } = currentLogger
@@ -50,10 +49,7 @@ const log = (...args) => {
 
     currentLogger.out(...args)
 
-    // do not forget to reset the currentFormat
-    currentFormat = null
-
-    return currentLogger
+    return nolog()
 
 }
 
@@ -99,11 +95,11 @@ export default class Logger {
                 currentLogger = target
 
                 // 3
-                // check and define the currentLevel, if ok, return log method (or noop according to the level constraint)
+                // check and define the currentLevel, if ok, return log method (or nolog according to the level constraint)
                 currentLevel = (key in Levels) && key
 
                 if (currentLevel)
-                    return allowLog(currentLogger, currentLevel) ? log : noop
+                    return allowLog(currentLogger, currentLevel) ? log : nolog
 
                 // 4
                 // the log method was not invoked, maybe the key refers to a format, if so, activate the format
