@@ -161,7 +161,7 @@
             D.debug('debug authorized by parent')
 
 
-            // link
+            // link, format inheritance
 
             Logger.defaultLevel = 'info'
 
@@ -194,9 +194,9 @@
 
             let foo = new Foo()
 
-            foo.speak()
+            foo.speak() // muted (level = defaultLevel = 'info')
             Foo.verbose = true
-            foo.speak()
+            foo.speak() // "[FOO instance] DEBUG speak" (because foo.logger.parent === Foo.logger > level inheritance + format inheritance)
 
 
         </script>
