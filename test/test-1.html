@@ -161,6 +161,44 @@
             D.debug('debug authorized by parent')
 
 
+            // link
+
+            Logger.defaultLevel = 'info'
+
+            class Foo {
+
+                constructor() {
+
+                    this.logger = new Logger({ prefix: '[FOO instance]', parent: Foo.logger })
+                    this.logger.link(this)
+
+                    Foo.logger.info('new instance')
+
+                }
+
+                speak() {
+
+                    this.logger.debug('speak')
+
+                    return 'fooooooo!'
+
+                }
+
+            }
+
+            Foo.logger = new Logger({ prefix: '[FOO]', format: {
+
+                default: (...args) => [Logger.currentLevel.toUpperCase(), ...args]
+
+            } }).link(Foo)
+
+            let foo = new Foo()
+
+            foo.speak()
+            Foo.verbose = true
+            foo.speak()
+
+
         </script>
     </body>
 </html>

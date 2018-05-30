@@ -10,6 +10,8 @@ const Levels = {
 
 }
 
+let defaultLevel = 'debug'
+
 const defautFormat = {
 
     ms: (time, ...args) => [...args, typeof time === 'number' ? `[${time.toFixed(1)}ms]` : `[? ${time} ?]`],
@@ -24,9 +26,17 @@ const allowLog = (logger, currentLevel) => {
 
 }
 
+const getFormat = (logger, name) => {
+
+    let { format, parent } = logger
+
+    return format[name] || (parent && getFormat(parent, name)) || defautFormat[name]
+
+}
+
 const applyFormat = (logger, name, args) => {
 
-    let format = logger.format[name] || defautFormat[name]
+    let format = getFormat(logger, name)
 
     return format ? format(...args) : args
 
@@ -55,6 +65,9 @@ const log = (...args) => {
 
 export default class Logger {
 
+    static get defaultLevel() { return defaultLevel }
+    static set defaultLevel(value) { defaultLevel = value }
+
     static setFormat(format) {
 
         Object.assign(defautFormat, format)
@@ -67,7 +80,7 @@ export default class Logger {
     static get currentLevel() { return currentLevel }
     static get currentFormat() { return currentFormat }
 
-    constructor({ prefix, level = 'debug', format = null, parent = null, ...props } = {}) {
+    constructor({ prefix, level = defaultLevel, format = null, parent = null, ...props } = {}) {
 
 
         Object.assign(this, {
@@ -134,6 +147,31 @@ export default class Logger {
     setFormat(format) {
 
         Object.assign(this.format, format)
+
+        return this
+
+    }
+
+    link(object) {
+
+        Object.defineProperties(object, {
+
+            verbose: {
+                get: () => { return this.verbose },
+                set: value => { this.verbose = value },
+            },
+
+            muted: {
+                get: () => { return this.muted },
+                set: value => { this.muted = value },
+            },
+
+            level: {
+                get: () => { return this.level },
+                set: value => { this.level = value },
+            },
+
+        })
 
         return this
 
